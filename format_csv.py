@@ -34,7 +34,7 @@ def load_tracks(path):
                 continue
 
             tracks[track_id].append({
-                "frame_idx": int(row["frame_idx"]),
+             #   "frame_idx": int(row["frame_idx"]),
                 "x":         float(row["x"]),
                 "y":         float(row["y"]),
             })
