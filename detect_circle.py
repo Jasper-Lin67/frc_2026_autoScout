@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import csv
 
+
 def find_circles(img):
     output = img.copy()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -38,7 +39,7 @@ def process_video(input_path, output_video_path, output_csv_path):
         writer = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
     with open(output_csv_path, "w", newline="") as csv_file:
         csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(["frame", "circle_index", "x", "y", "radius"])
+        csv_writer.writerow(["frame", "circle_index", "x", "y"])
         frame_idx = 0
         while True:
             ret, frame = cap.read()
@@ -48,18 +49,13 @@ def process_video(input_path, output_video_path, output_csv_path):
             if output_video_path:
                 writer.write(annotated)
             for circle_idx, (x, y, r) in enumerate(positions):
-                csv_writer.writerow([frame_idx, circle_idx, x, y, r])
+                csv_writer.writerow([frame_idx, circle_idx, x, y])
             frame_idx += 1
             if frame_idx % 100 == 0:
                 print(f"  Processed {frame_idx} frames...")
     cap.release()
-    writer.release()
+    if output_video_path:
+        writer.release()
     print(f"Done — {frame_idx} frames processed.")
     print(f"  Video : {output_video_path}")
     print(f"  CSV   : {output_csv_path}")
-
-process_video(
-    "/home/jasper/Python projects/Data/both.mp4",
-    "",
-    "both_out.csv"
-)
