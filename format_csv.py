@@ -9,36 +9,20 @@ MIN_FRAMES = 30  # discard any ball that appears in fewer than this many frames
 
 
 def load_tracks(path):
-    """
-    Read the DeepSort output CSV and group rows by track_id.
-
-    Returns a dict:
-        {
-            track_id: [
-                {"frame_idx": int, "x": float, "y": float},
-                ...
-            ],
-            ...
-        }
-    Rows are stored in frame order (the CSV is assumed to be frame-sorted).
-    """
     tracks = defaultdict(list)
-
     with open(path, newline="") as f:
         reader = csv.DictReader(f)
+        # Print headers so mismatches are immediately visible
+        print(f"  CSV headers: {reader.fieldnames}")
         for row in reader:
             track_id = row["track_id"]
-
-            # Skip detections that were never matched to a track
             if track_id == "unmatched":
                 continue
-
             tracks[track_id].append({
-             #   "frame_idx": int(row["frame_idx"]),
+                "frame_idx": int(row["frame_idx"]),  # must match filter_short_tracks
                 "x":         float(row["x"]),
                 "y":         float(row["y"]),
             })
-
     return tracks
 
 

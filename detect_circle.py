@@ -51,8 +51,8 @@ def process_video(input_path, output_video_path, output_csv_path):
             for circle_idx, (x, y, r) in enumerate(positions):
                 csv_writer.writerow([frame_idx, circle_idx, x, y])
             frame_idx += 1
-            if frame_idx % 100 == 0:
-                print(f"  Processed {frame_idx} frames...")
+            if frame_idx % 10 == 0:
+                print(f"  Processed {frame_idx} frames...", end="\r", flush=True)
     cap.release()
     if output_video_path:
         writer.release()

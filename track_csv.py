@@ -64,7 +64,7 @@ def run(
 
         for i, (frame_num, rows) in enumerate(iter_frames(input_path)):
             if i % print_every == 0:
-                print(f"Frame {i}/{total_frames} ({100*i//total_frames}%)", flush=True)
+                print(f"Frame {i}/{total_frames} ({100*i//total_frames}%)", end="\r", flush=True)
 
             detections = [
                 # bounding box: [left, top, width, height], confidence, class label
