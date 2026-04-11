@@ -20,13 +20,16 @@ def remove_file(file):
     except OSError as e:
         print(f"Error: {e.strerror}")
 
-user_input = input("presets\n\tjust do it-- : a \n\tdebug------- : b\nmanual\n\tfind circle- : 1\n\timport csv - : 2\n\tfit parabola : 3\n:")
-user_filepath = input("File path:")
+user_input = input("presets\n\tjust do it-- : a \n\tdebug------- : b\n\tbenchmark--- : c\nmanual\n\tfind circle- : 1\n\timport csv - : 2\n\tfit parabola : 3\n:")
 
-ensure_dir(user_filepath)
+
+
 que = []
 
 if "a" in user_input:
+    
+    user_filepath = input("File path:")
+    ensure_dir(user_filepath)
     
     video_in = input ("Video path in:")
     video_out = ""   
@@ -44,6 +47,9 @@ if "a" in user_input:
     
 elif "b" in user_input:
     
+    user_filepath = input("File path:")
+    ensure_dir(user_filepath)
+    
     video_in = input ("Video path in:")
     video_out = user_filepath + "stage1_video_out.mp4"
     csv_log = user_filepath + "csv_log.csv"
@@ -58,8 +64,30 @@ elif "b" in user_input:
     
     csv_parabola_out = user_filepath + "csv_parabola_out.csv"
     que.append("fit_parabola")
+    
+elif "c" in user_input:
+    
+    user_filepath = "/home/jasper/Python projects/Data/BENCHMARK/BENCHMARK"
+    ensure_dir(user_filepath)
+    
+    video_in = "/home/jasper/Python projects/Data/original.mp4"
+    video_out = ""   
+    csv_log = user_filepath + "csv_log.csv"
+    que.append("process_video")
+    
+    csv_unformated_out = user_filepath + "csv_unformated_out.csv"
+    que.append("connect")
+    csv_formated_out = user_filepath + "csv_formated_out.csv"
+    que.append("format_csv")
+    
+    csv_parabola_out = user_filepath + "csv_parabola_out.csv"
+    que.append("fit_parabola")
+    que.append("remove_logs")
 else:
-
+    
+    user_filepath = input("File path:")
+    ensure_dir(user_filepath)
+    
     if "1" in user_input:
             
         video_in = input ("Video path in:")
