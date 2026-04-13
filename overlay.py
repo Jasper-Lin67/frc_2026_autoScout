@@ -70,8 +70,8 @@ def overlay_ball_ids(input_video_path, csv_path, output_video_path):
 
         writer.write(frame)
         frame_idx += 1
-        if frame_idx % 10 == 0:
-            print(f"  Processed {frame_idx} frames...", end="\r", flush=True)
+        
+        print(f"  Processed {frame_idx} frames...", end="\r", flush=True)
 
     cap.release()
     writer.release()

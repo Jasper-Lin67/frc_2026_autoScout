@@ -3,7 +3,7 @@ from collections import defaultdict
 
 # ── Tunable value ─────────────────────────────────────────────────────────────
 
-MIN_FRAMES = 30  # discard any ball that appears in fewer than this many frames
+MIN_FRAMES = 5  # discard any ball that appears in fewer than this many frames
 
 # ──────────────────────────────────────────────────────────────────────────────
 

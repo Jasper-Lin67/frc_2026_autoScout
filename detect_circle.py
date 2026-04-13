@@ -14,7 +14,7 @@ def find_circles(img):
         minDist=10,
         param1=100,
         param2=10,
-        minRadius=2,
+        minRadius=4,
         maxRadius=11
     )
     
@@ -28,6 +28,7 @@ def find_circles(img):
     return output, positions
 
 def process_video(input_path, output_video_path, output_csv_path):
+    global frame_idx
     cap = cv2.VideoCapture(input_path)
     if not cap.isOpened():
         raise IOError(f"Cannot open video: {input_path}")
@@ -35,11 +36,11 @@ def process_video(input_path, output_video_path, output_csv_path):
         fps    = cap.get(cv2.CAP_PROP_FPS)
         width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*"h265")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         writer = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
     with open(output_csv_path, "w", newline="") as csv_file:
         csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(["frame", "circle_index", "x", "y"])
+        csv_writer.writerow(["frame", "circle_index", "x", "y","r"])
         frame_idx = 0
         while True:
             ret, frame = cap.read()
@@ -49,9 +50,9 @@ def process_video(input_path, output_video_path, output_csv_path):
             if output_video_path:
                 writer.write(annotated)
             for circle_idx, (x, y, r) in enumerate(positions):
-                csv_writer.writerow([frame_idx, circle_idx, x, y])
+                csv_writer.writerow([frame_idx, circle_idx, x, y, r])
             frame_idx += 1
-            if frame_idx % 10 == 0:
+            if frame_idx % 1 == 0:
                 print(f"  Processed {frame_idx} frames...", end="\r", flush=True)
     cap.release()
     if output_video_path:

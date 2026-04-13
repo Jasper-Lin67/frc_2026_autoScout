@@ -4,7 +4,7 @@ from collections import defaultdict
 
 # ── Tunable value ─────────────────────────────────────────────────────────────
 
-MIN_POINTS = 3  # need at least 3 points to fit a parabola
+MIN_POINTS = 20  # need at least 3 points to fit a parabola
 
 # ──────────────────────────────────────────────────────────────────────────────
 

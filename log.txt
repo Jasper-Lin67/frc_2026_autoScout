@@ -1,0 +1,31 @@
+presets
+	just do it--- : a 
+	debug-------- : b
+	benchmark---- : c
+manual
+	isolate balls : 1
+	find circle-- : 2
+	import csv--- : 3
+	fit parabola- : 4
+:using path /home/jasper/Python projects/Data/DEBUG/DEBUG_
+Exiting...
+presets
+	just do it--- : a 
+	debug-------- : b
+	benchmark---- : c
+manual
+	isolate balls : 1
+	find circle-- : 2
+	import csv--- : 3
+	fit parabola- : 4
+:using path /home/jasper/Python projects/Data/DEBUG/DEBUG_
+presets
+	just do it--- : a 
+	debug-------- : b
+	benchmark---- : c
+manual
+	isolate balls : 1
+	find circle-- : 2
+	import csv--- : 3
+	fit parabola- : 4
+:using path /home/jasper/Python projects/Data/DEBUG/DEBUG_

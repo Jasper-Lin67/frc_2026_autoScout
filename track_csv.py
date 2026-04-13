@@ -1,116 +1,91 @@
-import argparse
 import csv
 import numpy as np
-from similari import Sort, BoundingBox, PositionalMetricType
+from collections import defaultdict
 
-BOX_SIZE = 10  # half-width/height of the bounding box placed around each detected point (pixels)
+# ── Tunable values ─────────────────────────────────────────────────────────────
+
+MAX_MOVE_DIST = 80  # pixels — how far a ball can move between frames and still be the same ball
+
+# ──────────────────────────────────────────────────────────────────────────────
 
 
-def iter_frames(path):
-    current_frame = None
-    current_rows  = []
-    with open(path, newline="") as f:
-        reader = csv.reader(f)
-        next(reader)
+def match_detections(prev_tracks, detections):
+    """
+    Match new detections to existing tracks using nearest-centroid.
+    Returns:
+        updated:  {track_id: (x, y, r)}
+        used_det: set of detection indices that were matched
+    """
+    updated  = {}
+    used_det = set()
+
+    for tid, (px, py, pr) in prev_tracks.items():
+        best_dist = MAX_MOVE_DIST
+        best_idx  = None
+
+        for i, (x, y, r) in enumerate(detections):
+            if i in used_det:
+                continue
+            dist = np.sqrt((x - px)**2 + (y - py)**2)
+            if dist < best_dist:
+                best_dist = dist
+                best_idx  = i
+
+        if best_idx is not None:
+            used_det.add(best_idx)
+            updated[tid] = detections[best_idx]
+
+    return updated, used_det
+
+
+def main(input_csv, output_csv):
+    # load all detections grouped by frame
+    frames = defaultdict(list)
+    with open(input_csv, newline="") as f:
+        reader = csv.DictReader(f)
         for row in reader:
-            frame = int(row[0])
-            if frame != current_frame:
-                if current_rows:
-                    yield current_frame, current_rows
-                current_frame = frame
-                current_rows  = []
-            current_rows.append({
-                "frame_idx":  frame,
-                "circle_idx": row[1],
-                "x":          float(row[2]),
-                "y":          float(row[3]),
-            })
-    if current_rows:
-        yield current_frame, current_rows
+            frames[int(row["frame"])].append((
+                int(row["circle_index"]),
+                float(row["x"]),
+                float(row["y"]),
+                float(row["r"]),
+            ))
 
-
-def run(
-    input_path,
-    output_path,
-    max_age=30,    # how many frames a track survives without a detection before deletion
-    min_hits=1,    # detections required before a track is confirmed (n_init in Sort)
-    iou_threshold=0.3,  # IoU threshold — lower = stricter matching
-    shards=4,      # parallelism shards; 1-2 for <100 objects, 4+ for more
-):
-    # IoU metric: detections must overlap by at least iou_threshold to match a track
-    metric = PositionalMetricType.iou(threshold=iou_threshold)
-
-    tracker = Sort(
-        shards=shards,
-        bbox_history=1,       # we read results every frame so history of 1 is enough
-        max_idle_epochs=max_age,
-        method=metric,
-        min_confidence=0.1,   # minimum box confidence; all our boxes are 1.0 so this is a safe floor
-        spatio_temporal_constraints=None,
-    )
-
-    print_every = 1  # print progress every N frames
+    max_frame   = max(frames.keys())
+    prev_tracks = {}  # {track_id: (x, y, r)}
+    next_id     = 1   # start at 1 to match DeepSort style
     output_rows = []
 
-    for i, (frame_num, rows) in enumerate(iter_frames(input_path)):
-        if i % print_every == 0:
-            print(f"Frame {i}...", end="\r", flush=True)
+    for frame_idx in range(max_frame + 1):
+        detections     = frames.get(frame_idx, [])
+        det_coords     = [(x, y, r) for _, x, y, r in detections]
+        circle_indices = [c for c, _, _, _ in detections]
 
-        xs = np.array([r["x"] for r in rows])
-        ys = np.array([r["y"] for r in rows])
+        updated, used_det = match_detections(prev_tracks, det_coords)
 
-        # Build Similari BoundingBox list: (left, top, width, height) with confidence
-        # Each detection is paired with its index so we can match results back to rows
-        boxes = [
-            (
-                BoundingBox.new_with_confidence(
-                    x - BOX_SIZE,   # left
-                    y - BOX_SIZE,   # top
-                    BOX_SIZE * 2,   # width
-                    BOX_SIZE * 2,   # height
-                    1.0             # confidence
-                ).as_xyaah(),
-                idx   # custom_object_id — we pass the detection index for easy lookup
-            )
-            for idx, (x, y) in enumerate(zip(xs, ys))
-        ]
+        # assign new IDs to unmatched detections
+        for i, det in enumerate(det_coords):
+            if i not in used_det:
+                updated[next_id] = det
+                next_id += 1
 
-        # predict() runs the Kalman filter + Hungarian matching entirely in Rust
-        tracks = tracker.predict(boxes)
+        for i, (tid, (x, y, r)) in enumerate(updated.items()):
+            circle_idx = circle_indices[i] if i < len(circle_indices) else i
+            output_rows.append((frame_idx, circle_idx, x, y, tid))
 
-        # Build a lookup: detection index → track_id
-        # custom_object_id is the idx we passed in above
-        det_to_track = {}
-        for t in tracks:
-            if t.custom_object_id is not None:
-                det_to_track[t.custom_object_id] = t.id
+        prev_tracks = updated
+        print(f"Frame {frame_idx}/{max_frame}", end="\r", flush=True)
 
-        for idx, row in enumerate(rows):
-            tid = det_to_track.get(idx, "unmatched")
-            output_rows.append((row["frame_idx"], row["circle_idx"], row["x"], row["y"], tid))
-
-        # Clear wasted tracks to free memory (we don't need history)
-        tracker.clear_wasted()
-
-    print(f"\nWriting {len(output_rows)} rows...", flush=True)
-    with open(output_path, "w", newline="") as out_f:
-        writer = csv.writer(out_f)
+    with open(output_csv, "w", newline="") as f:
+        writer = csv.writer(f)
         writer.writerow(["frame_idx", "circle_idx", "x", "y", "track_id"])
         writer.writerows(output_rows)
 
-    print(f"Done. {len(output_rows)} rows written to {output_path}", flush=True)
+    print(f"\nDone — {max_frame + 1} frames, {len(output_rows)} rows written to {output_csv}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input",         required=True)
-    parser.add_argument("--output",        required=True)
-    parser.add_argument("--max_age",       type=int,   default=30)    # idle frames before track dies
-    parser.add_argument("--min_hits",      type=int,   default=1)     # hits to confirm a track
-    parser.add_argument("--iou_threshold", type=float, default=0.3)   # IoU match threshold
-    parser.add_argument("--shards",        type=int,   default=4)     # parallelism
-    parser.add_argument("--box_size",      type=int,   default=10)    # bounding box half-size
-    args = parser.parse_args()
-
-    BOX_SIZE = args.box_size
-    run(args.input, args.output, args.max_age, args.min_hits, args.iou_threshold, args.shards)
+    main(
+        input_csv  = "/home/jasper/Python projects/Data/DEBUG_csv_log.csv",
+        output_csv = "/home/jasper/Python projects/Data/DEBUG_csv_tracked.csv",
+    )
