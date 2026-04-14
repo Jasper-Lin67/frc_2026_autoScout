@@ -9,6 +9,7 @@ from fit_parabola import main as fit_parabola
 from draw_parabola import overlay_parabolas
 from draw_parabola_speed import overlay_parabolas as overlay_parabolas_speed
 from new_video import main as contrast
+from remove_slow_balls import main as remove_slow_balls
 import detect_circle as circle_finder
 
 def ensure_dir(filepath):
@@ -58,7 +59,7 @@ if "a" in user_input:
 elif "b" in user_input:
     
     #user_filepath_full = input("File path:") + "/" + input("File names:")
-    user_filepath_full ="/home/jasper/Python projects/Data/DEBUG/DEBUG_"
+    user_filepath_full ="/home/jasper/Python projects/Data/DEBUG_1/DEBUG_"
     ensure_dir(user_filepath_full)
     print("using path", user_filepath_full)
     
@@ -84,6 +85,8 @@ elif "b" in user_input:
     
     csv_parabola_out = user_filepath_full + "csv_parabola_out.csv"
     que.append("fit_parabola")
+    csv_fast_ball_out = user_filepath_full + "csv_fast_ball_out.csv"
+    que.append("remove_slow_balls")
     video_out_debug4 = user_filepath_full + "debug4_video_out.mp4"
     que.append("parabola_video")
     video_out_debug5 = user_filepath_full + "debug5_video_out.mp4"
@@ -96,7 +99,7 @@ elif "c" in user_input:
     user_filepath_full = "/home/jasper/Python projects/Data/BENCHMARK/BENCHMARK_"
     ensure_dir(user_filepath_full)
     
-    video_in = "/home/jasper/Python projects/Data/original.mp4"
+    video_in = "/home/jasper/Python projects/Data/testdat1.mp4"
     video_processed = user_filepath_full + "video_processed.mp4"  
     que.append("clean_video")
     
@@ -167,8 +170,8 @@ if "clean_video" in que:
     clean_video(video_in,video_processed)
 if "process_video" in que:
     circle_finder.process_video(video_processed, video_out_debug1, csv_log)
-if "contrast" in que:
-    contrast(csv_log, video_out_debug2)
+#if "contrast" in que:
+#    contrast(csv_log, video_out_debug2)
 if "connect" in que:
     connect(csv_log, csv_unformated_out)
 if "overlay_ball_ids" in que:
@@ -177,10 +180,12 @@ if "format_csv" in que:
     format_csv(csv_unformated_out,csv_formated_out)
 if "fit_parabola" in que:
     fit_parabola(csv_formated_out,csv_parabola_out)
-if "parabola_video" in que:
-    overlay_parabolas(video_in,csv_parabola_out,video_out_debug4)
+if "remove_slow_balls" in que:
+    remove_slow_balls(csv_parabola_out, csv_fast_ball_out)
+#if "parabola_video" in que:
+#    overlay_parabolas(video_in,csv_parabola_out,video_out_debug4)
 if "overlay_parabolas_speed" in que:
-    overlay_parabolas_speed(video_in,csv_parabola_out,video_out_debug5)
+    overlay_parabolas_speed(video_in,csv_fast_ball_out,video_out_debug5)
 if "remove_logs" in que:
     remove_file(video_processed)
     remove_file(csv_log)

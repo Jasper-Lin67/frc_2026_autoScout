@@ -21,7 +21,14 @@ def main(videoIn, videoOut):
     lower = np.array([10,  60,  80])
     upper = np.array([55, 255, 255])
 
+
+    total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    frame_idx = 0
+    
     while True:
+        
+        frame_idx += 1
+        
         ret, frame = video.read()
         if not ret or frame is None:
             break
@@ -49,15 +56,17 @@ def main(videoIn, videoOut):
         # convert single channel mask to 3 channel BGR for the writer
         result = cv2.bitwise_and(frame, frame, mask=color_mask)
 
-        cv2.imshow('Tracking',    cv2.resize(display,    None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
-        cv2.imshow('Motion Mask', cv2.resize(fg_mask,    None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
-        cv2.imshow('Color Mask',  cv2.resize(color_mask, None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
-        cv2.imshow('Result',      cv2.resize(result,     None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
+        # cv2.imshow('Tracking',    cv2.resize(display,    None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
+        # cv2.imshow('Motion Mask', cv2.resize(fg_mask,    None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
+        # cv2.imshow('Color Mask',  cv2.resize(color_mask, None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
+        # cv2.imshow('Result',      cv2.resize(result,     None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR))
 
         out.write(result)  # result is already 3 channel BGR
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+        
+        print(f"on frame {frame_idx} of {total_frames}", end= "\r")
 
     video.release()
     out.release()
