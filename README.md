@@ -1,4 +1,4 @@
-# THIS UNDER DEVELOPMENT AND INTENDED AS A DEMO
+# THIS UNDER DEVELOPMENT AND INTENDED AS A DEMO MOST OF THE CODE HERE WAS WRITTEN BY A LLM
 
 FRC_2026_Autoscout is intended to be a demo for autoscouting the First Robotics Competition 2026 Rebuilt and producing data compatable with Manuver (Blue Alliance)
 

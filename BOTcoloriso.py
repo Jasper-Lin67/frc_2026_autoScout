@@ -3,8 +3,9 @@ import cv2
 
 def main(videoIn,videoOut):
     video = cv2.VideoCapture(videoIn)
-    x1, y1 = 0, 40
-    x2, y2 = 640, 280
+
+    width  = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     fps = video.get(cv2.CAP_PROP_FPS)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
