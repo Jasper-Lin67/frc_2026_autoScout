@@ -8,7 +8,6 @@ import os
 import queue
 import hashlib
 import time
-import io
 import traceback
 import importlib
 
@@ -17,12 +16,12 @@ import importlib
 # =====================================================================
 TARGET_MODULE = "main"                 # File name: main.py
 TARGET_FUNCTION = "main"               # Function: def main(ThreadNum, fetch_url):
-DEFAULT_THREADS = 3                    
-MAX_THREADS = 50                       
-DEFAULT_DELAY = 1.0                    
-DEFAULT_URL = "https://www.thebluealliance.com/api/v3" # <--- AUTO-POPULATED URL
+DEFAULT_THREADS = 4                    
+MAX_THREADS = 64                       
+DEFAULT_DELAY = 10                   
+DEFAULT_URL = "httpv://dev.demo.sometimes" # <--- AUTO-POPULATED URL
 DEBUG_MODE = True                      
-AUTO_INPUT_VALUE = "b"                 
+AUTO_INPUT_VALUE = "z"                 
 REQUIREMENTS_FILE = "requirements.txt" 
 REQUIREMENTS_CACHE = ".req_hash"       
 # =====================================================================
@@ -87,7 +86,7 @@ class TerminalGUI:
         control_frame.pack(fill='x')
 
         # Left side controls
-        tk.Label(control_frame, text="Instances:", bg='#2d2d2d', fg='white', font=('Segoe UI', 9, 'bold')).pack(side='left')
+        tk.Label(control_frame, text="Threads:", bg='#2d2d2d', fg='white', font=('Segoe UI', 9, 'bold')).pack(side='left')
         self.thread_var = tk.IntVar(value=DEFAULT_THREADS)
         ttk.Spinbox(control_frame, from_=1, to=MAX_THREADS, textvariable=self.thread_var, width=5).pack(side='left', padx=5)
 
@@ -105,7 +104,7 @@ class TerminalGUI:
 
         # Right side Fetch URL input
         url_frame = tk.Frame(control_frame, bg='#2d2d2d')
-        url_frame.pack(side='right', padx=10)
+        url_frame.pack(side='right', padx=15)
         
         tk.Label(url_frame, text="Fetch URL:", bg='#2d2d2d', fg='white', font=('Segoe UI', 9, 'bold')).pack(side='left', padx=5)
         self.url_entry = tk.Entry(url_frame, width=35, font=('Consolas', 10))
@@ -202,7 +201,7 @@ class TerminalGUI:
 if __name__ == "__main__":
     multiprocessing.freeze_support()
     root = tk.Tk()
-    root.geometry("1200x800")
+    root.geometry("1980x1080")
     style = ttk.Style()
     style.theme_use('clam')
     app = TerminalGUI(root)

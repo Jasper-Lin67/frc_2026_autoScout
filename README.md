@@ -1,6 +1,6 @@
 # THIS UNDER DEVELOPMENT AND INTENDED AS A DEMO
 
-FRC_2026_Autoscout is intended to be a distributed computing system for the First Robotics Competition  2026 Rebuilt and Manuver (Blue Alliance)
+FRC_2026_Autoscout is intended to be a demo for autoscouting the First Robotics Competition 2026 Rebuilt and producing data compatable with Manuver (Blue Alliance)
 
 # Installation
 ## windows 🪟

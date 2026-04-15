@@ -36,7 +36,7 @@ def main(ThreadNum,URL):
 
     if "a" in user_input:
         
-        user_filepath_full = input("File path:") + "/" + input("File names:")
+        user_filepath_full = input("File path:")+ str(ThreadNum) + "/" + input("File names:")
         ensure_dir(user_filepath_full)
         print("using path", user_filepath_full)
         
@@ -60,7 +60,7 @@ def main(ThreadNum,URL):
     elif "b" in user_input:
         
         #user_filepath_full = input("File path:") + "/" + input("File names:")
-        user_filepath_full ="/home/jasper/Python projects/Data/DEBUG_1/DEBUG_"
+        user_filepath_full = f"/home/jasper/Python projects/Data/DEBUG_1{ThreadNum}/DEBUG_"
         ensure_dir(user_filepath_full)
         print("using path", user_filepath_full)
         
@@ -97,7 +97,7 @@ def main(ThreadNum,URL):
     elif ("c" in user_input) or("z" in user_input):
         
         
-        user_filepath_full = "/home/jasper/Python projects/Data/BENCHMARK/BENCHMARK_"
+        user_filepath_full = f"/home/jasper/Python projects/Data/BENCHMARK{ThreadNum}/BENCHMARK_"
         ensure_dir(user_filepath_full)
         
         video_in = "/home/jasper/Python projects/Data/testdat1.mp4"
@@ -199,4 +199,4 @@ def main(ThreadNum,URL):
         print(f"ran at {fps} fps")
 
 if __name__ == "__main__":
-    main(1,"https.google.com")
+    main(0,"https.google.com")
