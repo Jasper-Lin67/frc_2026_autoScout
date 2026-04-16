@@ -5,18 +5,15 @@ from collections import deque
 def hex_to_hsv_ranges(hex_color, h_tol=10, s_tol=40, v_tol=40):
     """
     Converts hex to HSV and applies individual tolerances for Hue, Saturation, and Value.
-    Units: H (0-180), S (0-255), V (0-255).
     """
     hex_color = hex_color.lstrip('#')
     r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
     
-    # Convert BGR to HSV
     rgb_pixel = np.uint8([[[b, g, r]]])
     hsv_pixel = cv2.cvtColor(rgb_pixel, cv2.COLOR_BGR2HSV)[0][0]
 
     h, s, v = int(hsv_pixel[0]), int(hsv_pixel[1]), int(hsv_pixel[2])
 
-    # Apply individual tolerances
     s_lower, s_upper = np.clip([s - s_tol, s + s_tol], 0, 255)
     v_lower, v_upper = np.clip([v - v_tol, v + v_tol], 0, 255)
     
@@ -24,7 +21,6 @@ def hex_to_hsv_ranges(hex_color, h_tol=10, s_tol=40, v_tol=40):
     h_upper = h + h_tol
 
     ranges = []
-    # Red Wrap-Around logic (OpenCV H: 0-180)
     if h_lower < 0:
         ranges.append((np.array([0, s_lower, v_lower], dtype=np.uint8),
                        np.array([h_upper, s_upper, v_upper], dtype=np.uint8)))
@@ -40,7 +36,7 @@ def hex_to_hsv_ranges(hex_color, h_tol=10, s_tol=40, v_tol=40):
                        np.array([h_upper, s_upper, v_upper], dtype=np.uint8)))
     return ranges
 
-def main(videoIn, videoOut, allowed_colors, lookback_frames=10, h_t=10, s_t=50, v_t=50):
+def main(videoIn, videoOut, allowed_colors, lookback_frames=10, h_t=10, s_t=50, v_t=50, box_size=(35, 75)):
     video = cv2.VideoCapture(videoIn)
     if not video.isOpened():
         print(f"Error: Could not open {videoIn}")
@@ -52,12 +48,15 @@ def main(videoIn, videoOut, allowed_colors, lookback_frames=10, h_t=10, s_t=50, 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(videoOut, fourcc, fps, (width, height))
 
-    # Build all ranges using the 3 specific tolerances
     all_ranges = []
     for color in allowed_colors:
         all_ranges.extend(hex_to_hsv_ranges(color, h_tol=h_t, s_tol=s_t, v_tol=v_t))
 
     mask_history = deque(maxlen=lookback_frames + 1)
+    
+    # --- Create the Solid Box Kernel ---
+    # This defines the exact rectangular area we will expand detected pixels into.
+    box_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, box_size)
 
     print(f"Tracking with tolerances -> H:{h_t}, S:{s_t}, V:{v_t}")
 
@@ -77,14 +76,13 @@ def main(videoIn, videoOut, allowed_colors, lookback_frames=10, h_t=10, s_t=50, 
 
         mask_history.append(current_mask)
         temporal_mask = current_mask.copy()
-
-        if len(mask_history) > lookback_frames:
-            past_mask = mask_history[0]
+        for past_mask in mask_history:
             temporal_mask = cv2.bitwise_or(temporal_mask, past_mask)
 
-        # Cleaning up the mask
-        temporal_mask = cv2.medianBlur(temporal_mask, 5)
-        temporal_mask = cv2.GaussianBlur(temporal_mask, (35, 75), 0)
+        # --- The Native OpenCV Box Area ---
+        # Dilation expands the mask natively in binary format. 
+        # Any white pixel becomes a solid white rectangle of `box_size`.
+        temporal_mask = cv2.dilate(temporal_mask, box_kernel, iterations=1)
 
         result = cv2.bitwise_and(frame, frame, mask=temporal_mask)
         out.write(result)
@@ -95,15 +93,16 @@ def main(videoIn, videoOut, allowed_colors, lookback_frames=10, h_t=10, s_t=50, 
     print("\nProcessing complete.")
 
 if __name__ == "__main__":
-    ALLOWED_HEX_LIST = ["#943045", "#964E5F", "#2F1F21"]
+    ALLOWED_HEX_LIST = ["#943045" ,"#6C4475"]
+                        #,"#964E5F", "#2F1F21"]
     
-    # You can now tweak each one individually:
     main(
-        videoIn="/home/jasper/Python projects/Data/testdat1.mp4", 
+        videoIn="/home/jasper/Python projects/Data/static_removed.mp4", 
         videoOut="/home/jasper/Python projects/Data/red_out.mp4", 
         allowed_colors=ALLOWED_HEX_LIST, 
-        lookback_frames=5,
-        h_t=10,   # Strict on Hue (keeps it red)
-        s_t=60,  # Forgiving on Saturation (handles washed out colors)
-        v_t=70   # Very forgiving on Value (handles shadows/dark areas)
+        lookback_frames=7,
+        h_t=6,
+        s_t=45,
+        v_t=50,
+        box_size=(75, 85)  # (width, height) of the expansion box
     )
