@@ -18,7 +18,7 @@ bash deb64_install.sh
 ```
 else follow instructions for Other
 ## Other
-Install python 3.*
+Install python 3.12.3
 
 Install pip
 
