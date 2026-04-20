@@ -110,7 +110,7 @@ def process_video(videoIn, videoOut, pngOut, allowed_colors,
     print("\nProcessing complete.")
 
 if __name__ == "__main__":
-    ALLOWED_HEX_LIST = ["#943045", "#964E5F", "#2F1F21", "#C0706D","#AB5254"]
+    ALLOWED_HEX_LIST = ["#943045", "#5A2227", "#CE2C27"]
     process_video(
         videoIn="/home/jasper/Python projects/Data/testdat1.mp4", 
         videoOut="/home/jasper/Python projects/Data/static_removed.mp4", 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         start_sec=30,               
         analyze_duration_sec=10,    
         static_threshold_pct=0.95,  
-        h_t=15, s_t=75, v_t=70,
+        h_t=7, s_t=55, v_t=35,
         expand_pixels=0,
         median_blur=5,
     )

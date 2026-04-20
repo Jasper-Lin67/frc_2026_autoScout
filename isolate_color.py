@@ -101,8 +101,8 @@ if __name__ == "__main__":
         videoOut="/home/jasper/Python projects/Data/red_out.mp4", 
         allowed_colors=ALLOWED_HEX_LIST, 
         lookback_frames=7,
-        h_t=6,
+        h_t=8,
         s_t=45,
-        v_t=50,
+        v_t=60,
         box_size=(75, 85)  # (width, height) of the expansion box
     )

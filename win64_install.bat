@@ -1,35 +1,52 @@
 @echo off
-setlocal
-cd /d "%~dp0"
+setlocal enabledelayedexpansion
 
-:: 1. Create a virtual environment if it doesn't exist
-if not exist ".venv" (
-    echo Creating self-contained environment...
-    python -m venv .venv
+:: --- Configuration ---
+set VENV_NAME=venv
+set REQS_FILE=requirements.txt
+
+echo [1/5] Checking for Python 3.12...
+:: Check if python is in path and if it's the right version
+python --version 2>nul | findstr "3.12" >nul
+if %errorlevel% equ 0 (
+    echo Python 3.12 is already installed.
+) else (
+    echo Python 3.12 not found. Attempting automatic installation via WinGet...
+    
+    :: Use WinGet to install Python 3.12 silently
+    winget install -e --id Python.Python.3.12 --silent --accept-package-agreements --accept-source-agreements
+    
+    if %errorlevel% neq 0 (
+        echo [ERROR] WinGet failed to install Python. Please install it manually from python.org.
+        pause
+        exit /b
+    )
+    
+    :: Refresh path so the current script can see the new installation
+    echo Installation successful. Refreshing environment...
+    call refreshenv >nul 2>&1 || (
+        echo [NOTE] You may need to restart this script for the new Python path to take effect.
+    )
 )
 
-:: 2. Activate the environment and check for Tkinter
-echo Activating environment...
-call .venv\Scripts\activate
-
-python -c "import tkinter" >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] Tkinter is missing from your Python installation.
-    echo Please re-run the Python installer and check "tcl/tk and IDLE".
-    pause
-    exit /b
+echo [2/5] Creating virtual environment in .\%VENV_NAME%...
+if exist %VENV_NAME% (
+    echo Virtual environment already exists. Skipping...
+) else (
+    python -m venv %VENV_NAME%
 )
 
-:: 3. Install/Update dependencies
-echo Installing requirements...
+echo [3/5] Upgrading pip inside venv...
+call %VENV_NAME%\Scripts\activate
 python -m pip install --upgrade pip
-:: Assumes you have a requirements.txt file in the same folder
-if exist "requirements.txt" (
-    python -m pip install -r requirements.txt
+
+echo [4/5] Installing requirements from %REQS_FILE%...
+if exist %REQS_FILE% (
+    pip install -r %REQS_FILE%
+) else (
+    echo [SKIP] %REQS_FILE% not found.
 )
 
-:: 4. Launch your GUI
-echo Starting dev_gui.py...
-python dev_gui.py
-
+echo [5/5] Setup complete! 
+echo To use your environment, run: call %VENV_NAME%\Scripts\activate
 pause

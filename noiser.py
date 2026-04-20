@@ -16,48 +16,43 @@ def black_to_noise(videoIn, videoOut):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(videoOut, fourcc, fps, (width, height))
 
-    # --- THE SPEED TRICK ---
-    # We allocate this block of memory exactly ONE time before the loop starts.
-    # Re-creating empty arrays on every frame is a massive speed killer.
+    # Pre-allocate noise buffer for speed
     noise_buffer = np.empty((height, width, 3), dtype=np.uint8)
 
-    print("Processing started...")
     start_time = time.time()
     frame_idx = 0
+
+    # Define the threshold (3% of 255 is roughly 8)
+    # This catches pixels from (0,0,0) up to (8,8,8)
+    LOWER_BLACK = (0, 0, 0)
+    UPPER_BLACK = (8, 8, 8)
 
     while True:
         ret, frame = video.read()
         if not ret:
             break
 
-        # 1. Create a mask of pure black pixels. 
-        # (0, 0, 0) to (0, 0, 0) means ONLY absolute black.
-        mask = cv2.inRange(frame, (0, 0, 0), (0, 0, 0))
+        # 1. Create a mask of "near-black" pixels (accounts for compression artifacts)
+        mask = cv2.inRange(frame, LOWER_BLACK, UPPER_BLACK)
 
-        # 2. Fill our pre-allocated buffer with random numbers (0 to 255).
-        # cv2.randu is significantly faster than np.random.randint
+        # 2. Fill pre-allocated buffer with random noise
         cv2.randu(noise_buffer, 0, 256)
 
-        # 3. Paste the noise onto the frame, but ONLY where the mask is white (where black was).
-        # This modifies the 'frame' directly in memory.
+        # 3. Apply noise only to the masked areas
         cv2.copyTo(src=noise_buffer, mask=mask, dst=frame)
 
-        # Write and track progress
         out.write(frame)
         
         frame_idx += 1
-        
         print(f"Processed {frame_idx} frames...", end="\r")
 
     video.release()
     out.release()
     
     elapsed = time.time() - start_time
-    print(f"\nProcessing complete! Processed {frame_idx} frames in {elapsed:.2f} seconds.")
-    print(f"Average speed: {frame_idx / elapsed:.2f} FPS")
+    print(f"\nProcessing complete! {frame_idx} frames in {elapsed:.2f}s ({frame_idx/elapsed:.2f} FPS).")
 
 if __name__ == "__main__":
-    # Change these paths to your actual files
     INPUT_VIDEO = "/home/jasper/Python projects/Data/red_out.mp4"
     OUTPUT_VIDEO = "/home/jasper/Python projects/Data/noise_out.mp4"
     
