@@ -8,7 +8,7 @@ FRC_2026_Autoscout is intended to be a demo for autoscouting the First Robotics 
 Run ~/win64_install.bat
 ## Linux 🐧/ macOS 🍎
 
-For most linux distos or macos
+For most linux distos or macOS
 ```bash
 sh ./posix_install.sh 
 ```
@@ -29,14 +29,11 @@ run gui_dev.py
 ```bash
 python gui_dev.py
 ```
-## Server
-just read server.js
 
-## Contributing
+# Contributing
 
 Not for now
-(email me)
 
-## License
+# License
 
 BSD 3-Clause License
