@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+echo "[1/2] Identifying Package Manager for removal..."
+
+if command -v nix-env >/dev/null 2>&1; then
+    echo "Removing Python 3.12 and Tkinter from Nix profile..."
+    nix-env -e python3.12 python3.12-tkinter
+elif [ "$OSTYPE" == "darwin"* ]; then
+    echo "Skipping removal on macOS to protect system tools."
+elif command -v apt-get >/dev/null 2>&1; then
+    echo "Removing components from Debian/Ubuntu..."
+    sudo apt-get remove -y python3.12-tk python3.12-venv python3.12-dev
+    sudo apt-get autoremove -y
+elif command -v dnf >/dev/null 2>&1; then
+    echo "Removing components from Fedora/RHEL..."
+    sudo dnf remove -y python3.12-devel python3.12-tkinter
+elif command -v pacman >/dev/null 2>&1; then
+    echo "Note: On Arch, Python is a core dependency. Skipping removal to prevent system instability."
+else
+    echo "Manual cleanup required."
+fi
+
+echo "[2/2] System cleanup complete."
