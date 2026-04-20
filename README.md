@@ -3,18 +3,14 @@
 FRC_2026_Autoscout is intended to be a demo for autoscouting the First Robotics Competition 2026 Rebuilt and producing data compatable with Manuver (Blue Alliance)
 
 # Installation
-## windows 🪟
-Run ~/win64_install.bat
-## 🍎
-```
-IDK
-```
-## 🐧
+## Windows 🪟
 
-For Debian based distros run
+Run ~/win64_install.bat
+## Linux 🐧/ macOS 🍎
+
+For most linux distos or macos
 ```bash
-sudo chmod +x deb64_install.sh
-bash deb64_install.sh
+sh ./posix_install.sh 
 ```
 else follow instructions for Other
 ## Other
@@ -28,8 +24,11 @@ Install requirements.txt to your venv
 
 Run 😀
 # Usage
-## User 
+
 run gui_dev.py
+```bash
+python gui_dev.py
+```
 ## Server
 just read server.js
 
